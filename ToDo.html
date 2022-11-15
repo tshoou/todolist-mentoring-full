@@ -5,57 +5,137 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style/output.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
     <title>ToDo</title>
 </head>
 <body class="bg-customPrimary font-bold my-8 mx-12">
     <header class=" text-white flex justify-between ">
         <h1 class="font-poppins  text-4xl">Reminders.</h1>
-        <div class="">
-            <h1>09:23 PM</h1>
-            <h1>Mon, 14 Nov 2022</h1>
+        <div>
+            <h1 id="time"></h1>
+            <h1 id="date"></h1>
         </div>
     </header>
     <div class="konten flex mt-10 flex-wrap md:flex-nowrap">
         <div class="bg-customSecondary w-full md:w-1/3 h-auto py-4 px-8 text-white rounded flex-auto">
-            <input type="text" name="title" id="title" placeholder="Task Title" class="bg-customSecondary rounded px-2 w-full h-12 border-black border-2 placeholder-white font-bold focus:outline-none focus:shadow-outline">
+            <form id="form-task">
+                <input type="text" name="title" id="title" placeholder="Task Title" class="bg-customSecondary rounded px-2 w-full h-12 border-black border-2 placeholder-white font-bold focus:outline-none focus:shadow-outline">
 
-            <input type="date" name="date" id="date" placeholder="Task Due Date" class="bg-customSecondary mt-4 rounded px-2 w-full h-12 border-black border-2 placeholder-white font-bold focus:outline-none focus:shadow-outline">
+                <input type="date" name="date" id="date" placeholder="Task Due Date" class="bg-customSecondary mt-4 rounded px-2 w-full h-12 border-black border-2 placeholder-white font-bold focus:outline-none focus:shadow-outline">
 
-            <textarea placeholder="Task Description" id="description" rows="7" class="bg-customSecondary mt-4 rounded px-2 w-full border-black border-2 placeholder-white font-bold focus:outline-none focus:shadow-outline"></textarea>
+                <textarea placeholder="Task Description" id="description" rows="7" class="bg-customSecondary mt-4 rounded px-2 w-full border-black border-2 placeholder-white font-bold focus:outline-none focus:shadow-outline"></textarea>
 
-            <button class=" bg-customTertiary text-white rounded py-2 w-full mt-4">Add Task</button>
+                <button onclick="button_task({type:'add'})" class=" bg-customTertiary text-white rounded py-2 w-full mt-4">Add Task</button>
+            </form>
+            
         </div>
-        <div class="md:w-2/3 mt-4 md:mt-0 w-full bg-customSecondary h-auto text-white rounded ml-0 md:ml-10 flex flex-wrap justify-between">
-            <div class="w-96 h-auto bg-customPrimary p-4 rounded mx-2 my-2">
-                <h1>Judul Task</h1>
-                <h2 class="text-customTertiary">11/12/22</h2>
-                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quae dicta fuga iusto blanditiis a consequatur soluta, quis, voluptatum dolore dignissimos illum, quasi expedita debitis possimus qui provident odio eveniet quod.</p>
-            </div>
-
-            <div class="w-96 h-auto bg-customPrimary p-4 rounded mx-2 my-2">
-                <h1>Judul Task</h1>
-                <h2 class="text-customTertiary">11/12/22</h2>
-                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quae dicta fuga iusto blanditiis a consequatur soluta, quis, voluptatum dolore dignissimos illum, quasi expedita debitis possimus qui provident odio eveniet quod.</p>
-            </div>
-
-            <div class="w-96 h-auto bg-customPrimary p-4 rounded mx-2 my-2">
-                <h1>Judul Task</h1>
-                <h2 class="text-customTertiary">11/12/22</h2>
-                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quae dicta fuga iusto blanditiis a consequatur soluta, quis, voluptatum dolore dignissimos illum, quasi expedita debitis possimus qui provident odio eveniet quod.</p>
-            </div>
-
-            <div class="w-96 h-auto bg-customPrimary p-4 rounded mx-2 my-2">
-                <h1>Judul Task</h1>
-                <h2 class="text-customTertiary">11/12/22</h2>
-                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quae dicta fuga iusto blanditiis a consequatur soluta, quis, voluptatum dolore dignissimos illum, quasi expedita debitis possimus qui provident odio eveniet quod.</p>
-            </div>
-
-            <div class="w-96 h-auto bg-customPrimary p-4 rounded mx-2 my-2">
-                <h1>Judul Task</h1>
-                <h2 class="text-customTertiary">11/12/22</h2>
-                <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quae dicta fuga iusto blanditiis a consequatur soluta, quis, voluptatum dolore dignissimos illum, quasi expedita debitis possimus qui provident odio eveniet quod.</p>
-            </div>
+        <div id="task-container" class="md:w-2/3 mt-4 md:mt-0 w-full bg-customSecondary h-auto text-white rounded ml-0 md:ml-10 flex flex-wrap justify-between">
+            
         </div>
     </div>
+    <script>
+        $(document).ready(() => {
+            dateTime();
+        if(!localStorage.hasOwnProperty("task")){
+            let task = [
+                {
+                    id:1,
+                    title:"contoh",
+                    date: moment().format('MM/DD/YYYY'),
+                    description: "lorem ipsum, dolor sit amet consectetur adipisicing elit."
+                }
+            ];
+            localStorage.setItem("task", JSON.stringify(task));
+
+        }
+        button_task({type:'render'})
+        });
+
+        const dateTime = () => {
+            $("#time").html(moment().format("hh:mm A"));
+            $("#date").html(moment().format("ddd, DD MM YYYY"));
+        }
+
+        const button_task = (data) => {
+            switch(data.type){
+                case "add":
+                    add_task();
+                    render_task();
+                    break;
+                case "delete":
+                    delete_task(data.id);
+                    render_task();
+                    break;
+                case "render":
+                    render_task()
+            }
+        }; 
+    const add_task = () => {
+        let title = $("input#title").val();
+        let date = $("input#date").val();
+        let description = $("textarea#description").val();
+
+        if(title && date && description){
+            add_data({ title, date, description });
+            $("#form-task").trigger("reset");
+
+        }else {
+            alert("isi dengan benar");
+        }
+    };
+    const add_data = (data) => {
+        if(localStorage.hasOwnProperty("task")){
+            let task = JSON.parse(localStorage.getItem("task"));
+            task.push({
+                id: task.length+1,
+                title:data.title,
+                date:data.date,
+                description:data.description
+
+            });
+            localStorage.setItem("task", JSON.stringify(task));
+        }
+    };
+    const delete_task = (id) => {
+        if(confirm("Apakah kamu yakin ingin menghapus task?")){
+            let task = JSON.parse(localStorage.getItem("task"));
+            task = task.filter((obj) => {
+                return obj.id !==id;
+            });
+            localStorage.setItem("task", JSON.stringify(task));
+        }
+    };
+    const render_task = () => {
+        if(localStorage.hasOwnProperty("task")) {
+            $("#task-container").html("");
+            let task = JSON.parse(localStorage.getItem("task"));
+            task.forEach((item) => {
+                $("#task-container").append(`
+                <div class="w-96 h-auto bg-customPrimary p-4 rounded mx-2 my-2" >
+                    <div class="flex justify-between">
+                        <div>
+                            <h1>${item.title}</h1>
+                            <h2 class=" ${moment().format() > moment(item.date).format()
+                                ? "text-customTertiary"
+                                : ""
+                            }">${item.date}</h2>
+                        </div>
+                        <div>
+                            <button class="rounded-full w-7 h-7 delete" onclick="button_task({type:'delete', id:${item.id}})">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <p>${item.description}</p>
+                </div>
+                `);
+            })
+        }
+    }
+    </script>
 </body>
+
 </html>
